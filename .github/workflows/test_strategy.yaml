@@ -26,8 +26,9 @@ jobs:
       - name: Generate new data point
         run: |
           # Generate data to a temp file outside the repo structure to survive checkout
-          python main_repo/test_strategy/generate_dummy_data.py ../new_data_point.csv
-          cat ../new_data_point.csv
+          # Use runner.temp to be safe and avoid relative path confusion
+          python main_repo/test_strategy/generate_dummy_data.py "${{ runner.temp }}/new_data_point.csv"
+          cat "${{ runner.temp }}/new_data_point.csv"
 
       - name: Checkout (or create) orphan statistics branch
         run: |
@@ -51,13 +52,8 @@ jobs:
       - name: Append data and Push
         run: |
           cd main_repo
-          # Append the new data line (skipping header from the temp file if it has one? 
-          # My script adds header if file is empty. Let's just cat the new line.
-          # The script logic I wrote adds a header if the file doesn't exist. 
-          # Since I'm appending to ../new_data_point.csv which is new, it has a header.
-          # We want to skip the header of the NEW data when appending to the OLD data.
-          
-          tail -n +2 ../new_data_point.csv >> dummy_stats.csv
+          # Append the new data line (skipping header from the temp file)
+          tail -n +2 "${{ runner.temp }}/new_data_point.csv" >> dummy_stats.csv
           
           git add dummy_stats.csv
           git commit -m "Update dummy statistics"
