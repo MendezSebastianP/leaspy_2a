@@ -4,3 +4,70 @@
 .sphx-glr-thumbcontainer .xref.std.std-ref {
     display: none;
 }
+
+/* Override sphinxcontrib-mermaid JavaScript-injected styles */
+/* 
+   What worked: The sphinxcontrib-mermaid extension injects JavaScript that creates 
+   inline styles with hardcoded height: 500px. We override this with !important flags
+   and target the exact DOM structure: .mermaid-container > pre > svg
+   
+   Size variants: Use these classes to control diagram sizes
+*/
+
+/* Default size: 700px height, 1200px max width */
+.mermaid-container {
+    width: 100% !important;
+    max-width: 1200px !important;
+    min-height: 700px !important;
+    margin: 30px auto !important;
+    display: flex !important;
+}
+
+.mermaid-container > pre,
+pre.mermaid {
+    width: 100% !important;
+    min-height: 700px !important;
+    display: block !important;
+}
+
+.mermaid-container > pre > svg,
+pre.mermaid > svg {
+    height: 700px !important;
+    min-height: 700px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Small variant: 400px height, 800px max width */
+.mermaid-small .mermaid-container {
+    max-width: 800px !important;
+    min-height: 400px !important;
+}
+
+.mermaid-small .mermaid-container > pre,
+.mermaid-small pre.mermaid {
+    min-height: 400px !important;
+}
+
+.mermaid-small .mermaid-container > pre > svg,
+.mermaid-small pre.mermaid > svg {
+    height: 400px !important;
+    min-height: 400px !important;
+}
+
+/* Large variant: 900px height, 1400px max width */
+.mermaid-large .mermaid-container {
+    max-width: 1400px !important;
+    min-height: 900px !important;
+}
+
+.mermaid-large .mermaid-container > pre,
+.mermaid-large pre.mermaid {
+    min-height: 900px !important;
+}
+
+.mermaid-large .mermaid-container > pre > svg,
+.mermaid-large pre.mermaid > svg {
+    height: 900px !important;
+    min-height: 900px !important;
+}

@@ -49,9 +49,16 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "myst_nb",
     "sphinxcontrib.bibtex",
+    "sphinxcontrib.mermaid",
 ]
 
 bibtex_bibfiles = ["references.bib"]
+
+# -- mermaid configuration ---------------------------------------------------
+# Configure mermaid diagram rendering
+mermaid_params = ['--theme', 'default', '--width', '1200', '--backgroundColor', 'transparent']
+mermaid_sequence_config = False
+mermaid_verbose = False
 
 # -- autoapi configuration ---------------------------------------------------
 # https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html

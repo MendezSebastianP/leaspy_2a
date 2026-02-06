@@ -80,3 +80,11 @@ references
 changelog
 license
 ```
+
+```{toctree}
+:hidden:
+:caption: Developer Guide
+:maxdepth: 2
+
+docdev/index
+```
