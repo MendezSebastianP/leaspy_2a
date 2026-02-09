@@ -32,3 +32,23 @@ Leaspy uses specific terminology that bridges statistical learning theory and so
 ### Sampler
 *   **In Plain English**: A random number generator that tries to guess the hidden individual parameters.
 *   **Rigorous Definition**: A statistical routine (usually Gibbs Sampling or Metropolis-Hastings) used to simulate realizations of the latent variables $z$ from the posterior distribution $p(z | y, \theta)$. Leaspy uses these during the "Simulation" step of SAEM.
+
+## Software Architecture Terms
+
+### Interface
+*   **Definition**: A contract that defines *what* a class should do, without defining *how*. In Python, this is technically realized using Abstract Base Classes (ABCs) with all methods empty.
+*   **Use in Leaspy**: `ModelInterface` ensures that all models (Logistic, Linear, etc.) have the standard methods like `fit()` and `personalize()`, so algorithms can trust them.
+
+### Abstract Class
+*   **Definition**: A class that provides some implementation but leaves other parts unfinished (abstract). You cannot create an instance of an abstract class directly.
+*   **Use in Leaspy**: `BaseModel` handles the "plumbing" (like input validation) but leaves the specific "math" (like trajectory formulas) to its subclasses.
+
+### Decorator
+*   **In Plain English**: A usage label you stick on a function to change how it behaves, usually starting with `@`.
+*   **Common Leaspy Decorators**:
+    *   `@property`: Turns a method into an attribute. Instead of writing `model.dimension()`, you can write `model.dimension`.
+    *   `@abstractmethod`: A "Must Do" label. It tells Python: "Any subclass MUST write its own version of this method, or it will crash."
+    *   `@classmethod`: A method that belongs to the class itself, not a specific object instance. Used often for factory methods like `load()`.
+    *   `@staticmethod`: A utility function that lives inside a class but doesn't need access to the class (`cls`) or instance (`self`). It's just a regular function put there for organization.
+    *   `@overload`: A hint for developers and type-checkers. It provides multiple "signatures" for a function to describe different valid inputs, but the actual implementation is a separate function below it.
+    *   `@final`: A "Do Not Touch" label. It tells developers and tools that this class or method should not be subclassed or overridden.

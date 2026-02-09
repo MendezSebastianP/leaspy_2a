@@ -88,7 +88,7 @@ This example allows us to see how is structured a module, we will go deeper in t
 
 ## Simplified workflow structure
 
-When you create your model and you fit it a lot happens under the hood. For instance `LogisticModel` inherits methods and attributes from other classes in a chain. `LogisticModel` inherits from `RiemanianManifoldModel`, which inherits from other classes, and so on.
+When you create your model and you fit it a lot happens under the hood. For instance `LogisticModel` inherits methods and attributes from other classes in a chain. `LogisticModel` inherits from `RiemanianManifoldModel`, which inherits from other classes, and so on. 
 
 Here is the inheritance chain for the Logistic model. You can click on the nodes to see the details of each class.
 
@@ -131,4 +131,13 @@ flowchart TD
     click Logistic "logistic/LogisticModel.html" "Go to LogisticModel"
 ```
 
-This diagram is clickable. If you want more details about a specific module, you can click on it. For now, let's start with the base of the inheritance chain: [`BaseModel`](logistic/BaseModel).
+This diagram is clickable. If you want more details about a specific module, you can click on it. For now, let's start with the base of the inheritance chain: [`ModelInterface`](logistic/ModelInterface).
+
+## Why This Architecture?
+
+While you could theoretically write a `LogisticModel` as one massive 5000-line class, Leaspy breaks it down into a **compositional inheritance chain**. Each class in the diagram above adds a specific layer of capability:
+
+*   **Reusability**: `LinearModel` and `JointModel` reuse 90% of the same code as `LogisticModel` (parameter storage, algorithm compatibility). They only override the final mathematical formulas.
+*   **Extensibility**: If you want to create a model with a different time behavior, you don't start from scratch. You might branch off after `McmcSaemCompatibleModel` and implement your own time reparameterization, while keeping all the algorithm compatibility for free.
+
+This "layer" approach means complex features (like Riemannian manifold geometry or MCMC sampling) are implemented once and shared across all models, rather than being copy-pasted into every new model type.

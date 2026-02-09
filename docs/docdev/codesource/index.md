@@ -7,6 +7,7 @@ This section contains a detailed analysis of the Leaspy source code structure, e
 :caption: Contents
 
 architecture
+logistic/ModelInterface
 logistic/BaseModel
 logistic/StatefulModel
 logistic/McmcSaemCompatibleModel
