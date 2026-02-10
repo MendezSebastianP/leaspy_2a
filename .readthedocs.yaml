@@ -8,8 +8,8 @@ build:
     post_create_environment:
       - pip install poetry
       - poetry config virtualenvs.create false
-      - . "$READTHEDOCS_VIRTUALENV_PATH/bin/activate" && poetry install --with docs
-      - pip freeze
-
-sphinx:
-  configuration: docs/conf.py
+    post_install:
+      - poetry install --with docs
+    post_build:
+      - mkdir -p $READTHEDOCS_OUTPUT/html
+      - poetry run sphinx-build -b html docs $READTHEDOCS_OUTPUT/html
