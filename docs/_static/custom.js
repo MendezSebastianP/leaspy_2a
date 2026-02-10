@@ -28,4 +28,11 @@ document.addEventListener("DOMContentLoaded", function() {
         cb.checked = localStorage.getItem(key) === 'true';
         cb.onchange = () => localStorage.setItem(key, cb.checked);
     });
+
+    // DAG image zoom on click
+    document.querySelectorAll('img.dag-zoomable').forEach(function(img) {
+        img.addEventListener('click', function() {
+            this.classList.toggle('zoomed');
+        });
+    });
 });

@@ -73,6 +73,8 @@ myst-nb = "*"
 sphinxcontrib-bibtex = "*"
 sphinxcontrib-mermaid = "*"
 pydata-sphinx-theme = "^0.16.1"
+sphinx-tabs = "*"
+sphinx_design = "*"
 
 [tool.ruff]
 target-version = "py39"

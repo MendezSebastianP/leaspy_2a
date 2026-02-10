@@ -6,15 +6,7 @@
 }
 
 /* Override sphinxcontrib-mermaid JavaScript-injected styles */
-/* 
-   What worked: The sphinxcontrib-mermaid extension injects JavaScript that creates 
-   inline styles with hardcoded height: 500px. We override this with !important flags
-   and target the exact DOM structure: .mermaid-container > pre > svg
-   
-   Size variants: Use these classes to control diagram sizes
-*/
-
-/* Default size: 700px height, 1200px max width */
+/* Target the container wrapper */
 .mermaid-container {
     width: 100% !important;
     max-width: 1200px !important;
@@ -23,6 +15,7 @@
     display: flex !important;
 }
 
+/* Target the pre element that wraps mermaid */
 .mermaid-container > pre,
 pre.mermaid {
     width: 100% !important;
@@ -30,6 +23,7 @@ pre.mermaid {
     display: block !important;
 }
 
+/* Override the hardcoded 500px height from JavaScript */
 .mermaid-container > pre > svg,
 pre.mermaid > svg {
     height: 700px !important;
@@ -38,36 +32,35 @@ pre.mermaid > svg {
     max-width: 100% !important;
 }
 
-/* Small variant: 400px height, 800px max width */
-.mermaid-small .mermaid-container {
-    max-width: 800px !important;
-    min-height: 400px !important;
+/* Colored dots for variable type legend */
+.vdot {
+    display: inline-block;
+    width: 0.75em;
+    height: 0.75em;
+    border-radius: 50%;
+    border: 1px solid #555;
+    vertical-align: middle;
+    margin-right: 0.2em;
 }
 
-.mermaid-small .mermaid-container > pre,
-.mermaid-small pre.mermaid {
-    min-height: 400px !important;
+/* DAG variable tables: 25% name+type, 75% description */
+.dag-var-table th:first-child,
+.dag-var-table td:first-child { width: 25%; }
+.dag-var-table th:last-child,
+.dag-var-table td:last-child { width: 75%; }
+
+/* DAG zoomable image - click to zoom in/out */
+.dag-zoomable {
+    cursor: zoom-in;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+    height: auto;
 }
 
-.mermaid-small .mermaid-container > pre > svg,
-.mermaid-small pre.mermaid > svg {
-    height: 400px !important;
-    min-height: 400px !important;
-}
-
-/* Large variant: 900px height, 1400px max width */
-.mermaid-large .mermaid-container {
-    max-width: 1400px !important;
-    min-height: 900px !important;
-}
-
-.mermaid-large .mermaid-container > pre,
-.mermaid-large pre.mermaid {
-    min-height: 900px !important;
-}
-
-.mermaid-large .mermaid-container > pre > svg,
-.mermaid-large pre.mermaid > svg {
-    height: 900px !important;
-    min-height: 900px !important;
+.dag-zoomable.zoomed {
+    cursor: zoom-out;
+    transform: scale(1.5);
+    transform-origin: center;
+    z-index: 1000;
+    position: relative;
 }

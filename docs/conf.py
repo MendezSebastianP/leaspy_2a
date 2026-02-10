@@ -50,6 +50,8 @@ extensions = [
     "myst_nb",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.mermaid",
+    "sphinx_tabs.tabs",
+    "sphinx_design",
 ]
 
 bibtex_bibfiles = ["references.bib"]
