@@ -1,9 +1,9 @@
 # BaseModel
 
 **Module:** `leaspy.models.base`
-**Inherits from:** [`ModelInterface`](ModelInterface)
+**Inherits from:** [`ModelInterface`](ModelInterface.md)
 
-While [`ModelInterface`](ModelInterface) defines the strict contract (the *what*), `BaseModel` provides the concrete implementation of the orchestration layer (the *how*). Every model inherits from BaseModel to gain the built-in infrastructure needed to run optimization algorithms like MCMC-SAEM without rewriting the boilerplate code.
+While [`ModelInterface`](ModelInterface.md) defines the strict contract (the *what*), `BaseModel` provides the concrete implementation of the orchestration layer (the *how*). Every model inherits from BaseModel to gain the built-in infrastructure needed to run optimization algorithms like MCMC-SAEM without rewriting the boilerplate code.
 
 ## The Bridge Between Model, Algorithm, and Data
 
@@ -104,6 +104,6 @@ BaseModel is abstract — you cannot instantiate it directly. Concrete models li
 
 Each layer fulfills part of the contract BaseModel established. By the time you reach LogisticModel, all abstract methods have concrete implementations. This allows the algorithm to call methods like `compute_individual_trajectory()` and receive actual predictions based on the logistic curve formula.
 
-See the [inheritance diagram](../architecture.md#simplified-workflow-structure) to visualize the complete
+See the [inheritance diagram](../architecture.md) to visualize the complete
 
-See the [inheritance diagram](../architecture.md#simplified-workflow-structure) to understand the full chain from BaseModel to LogisticModel.
+See the [inheritance diagram](../architecture.md) to understand the full chain from BaseModel to LogisticModel.

@@ -1,11 +1,11 @@
 # McmcSaemCompatibleModel
 
 **Module:** `leaspy.models.mcmc_saem_compatible`
-**Inherits from:** [`StatefulModel`](StatefulModel)
+**Inherits from:** [`StatefulModel`](StatefulModel.md)
 
 `document: leaspy.models.mcmc_saem_compatible.McmcSaemCompatibleModel`
 
-[`StatefulModel`](StatefulModel) gives a model its internal variable representation (the `State` and [DAG](../variables/DAG)). But that alone does not tell the algorithm **how to use** those variables during optimization.
+[`StatefulModel`](StatefulModel.md) gives a model its internal variable representation (the `State` and [DAG](../variables/DAG)). But that alone does not tell the algorithm **how to use** those variables during optimization.
 
 `McmcSaemCompatibleModel` bridges this gap. It defines the **contract** that the MCMC-SAEM algorithm expects: how to compute statistics, how to update parameters, and how to inject data and individual parameters into the state.
 
@@ -121,7 +121,7 @@ for iteration in range(n_iter):
     model.update_parameters(state, suff_stats, burn_in=(iteration < burn_in_threshold))
 ```
 
-The `sampler.sample(...)` step internally uses the State's **forking** capability (described in [StatefulModel](StatefulModel)): it proposes a change in a temporary fork, evaluates the acceptance ratio, and either keeps or discards the proposal.
+The `sampler.sample(...)` step internally uses the State's **forking** capability (described in [StatefulModel](StatefulModel.md)): it proposes a change in a temporary fork, evaluates the acceptance ratio, and either keeps or discards the proposal.
 
 ## What This Class Does NOT Do
 

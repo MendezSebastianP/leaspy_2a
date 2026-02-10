@@ -12,7 +12,6 @@ logistic/BaseModel
 logistic/StatefulModel
 logistic/McmcSaemCompatibleModel
 logistic/TimeReparametrizedModel
-logistic/RiemanianManifoldModel
 logistic/LogisticInitializationMixin
 logistic/LogisticModel
 variables/DAG

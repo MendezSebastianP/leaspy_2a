@@ -37,7 +37,7 @@ Leaspy uses a **DAG** (Directed Acyclic Graph):
 
 Example (informal):
 
-```
+```text
 t_ij  ─┐
     ├──>  t_shifted = t_ij - tau_i
 tau_i ─┘
@@ -76,7 +76,7 @@ def _initialize_state(self):
 ```
 
 ```{note}
-The `State` is built from the model's *variable specifications* (`get_variables_specs()`), **not** from constructor arguments like `name` or `features` directly. Noise handling is part of the observation model layer (see [McmcSaemCompatibleModel](McmcSaemCompatibleModel)), not something `StatefulModel` itself manages.
+The `State` is built from the model's *variable specifications* (`get_variables_specs()`), **not** from constructor arguments like `name` or `features` directly. Noise handling is part of the observation model layer (see [McmcSaemCompatibleModel](McmcSaemCompatibleModel.md)), not something `StatefulModel` itself manages.
 ```
 
 Once the state exists, `StatefulModel` exposes higher-level helpers to interact with it without leaking the internal details:
@@ -131,6 +131,6 @@ Use `StatelessModel` when:
 
 `StatefulModel` gives a model its internal structure: the `State`, the [DAG](../variables/DAG), and typed access to variables. But it says nothing about **how the algorithm should use** that structure during optimization.
 
-That is the role of [`McmcSaemCompatibleModel`](McmcSaemCompatibleModel), which inherits from `StatefulModel` and adds the contract that the MCMC-SAEM algorithm expects: computing sufficient statistics, updating parameters, and injecting data into the state.
+That is the role of [`McmcSaemCompatibleModel`](McmcSaemCompatibleModel.md), which inherits from `StatefulModel` and adds the contract that the MCMC-SAEM algorithm expects: computing sufficient statistics, updating parameters, and injecting data into the state.
 
-→ Continue reading: [McmcSaemCompatibleModel](McmcSaemCompatibleModel)
+→ Continue reading: [McmcSaemCompatibleModel](McmcSaemCompatibleModel.md)

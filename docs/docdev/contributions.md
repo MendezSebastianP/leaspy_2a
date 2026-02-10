@@ -40,6 +40,7 @@ When we create new branches in our fork, we follow naming conventions. The name 
 
 > **Example:** If we want to fix the CSV generation methods, our branch will be called `fix/csv_generation`.
 
+(initial-setup-first-time-contributors)=
 ## Initial Setup (First-Time Contributors)
 
 ### 1. Fork the Repository
@@ -183,10 +184,11 @@ When the official repository changes while you're working on your branch, you ma
 
 When the official repository changes and you have an active branch, you can face one or more of these problems:
 
-- [New release while you're working on your branch](#scenario-new-release-while-youre-working)
+- [New release while you're working on your branch](#scenario-new-release-while-you-re-working)
 - [New release and your PR is targeting the old branch](#scenario-your-pr-target-branch-changed)
 - [New major release / major upstream restructuring](#scenario-major-upstream-restructuring)
 
+(scenario-new-release-while-you-re-working)=
 ### Scenario: New Release While You're Working
 
 You're working on a feature branch, and upstream moves forward (new commits land, or a new release is cut). This can cause conflicts if the same files were modified.
@@ -221,6 +223,7 @@ git push
 > **Important:** Your branch does not "point to" upstream. After the merge, your branch contains a merge commit that brings in upstream changes *up to that moment*. If upstream continues to move, you may need to fetch/merge again later.
 
 > **Why merge instead of rebase?** Merge preserves your commit history exactly as it happened and creates a clear "merge point" in the history. If something goes wrong, you can easily identify when the merge happened and revert if needed. Rebase rewrites history, which can cause confusion and requires force-pushing—risky if you're not experienced with Git.
+(scenario-your-pr-target-branch-changed)=
 
 ### Scenario: Your PR Target Branch Changed
 
@@ -239,6 +242,7 @@ git push
 ```
 
 This brings your branch up to date with the new target, and your PR will update automatically.
+(scenario-major-upstream-restructuring)=
 
 ### Scenario: Major Upstream Restructuring
 
@@ -261,6 +265,7 @@ git push
 ```
 
 The backup branch lets you compare what changed or restore your work if the merge doesn't go as expected.
+(resolving-conflicts)=
 
 ## Resolving Conflicts
 
