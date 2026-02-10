@@ -5,11 +5,11 @@ build:
   tools:
     python: "3.11"
   jobs:
-    post_create_environment:
+    post_install:
       - pip install poetry
       - poetry config virtualenvs.create false
-    post_install:
-      - poetry install --with docs
-    post_build:
-      - mkdir -p $READTHEDOCS_OUTPUT/html
-      - poetry run sphinx-build -b html docs $READTHEDOCS_OUTPUT/html
+      - poetry install --with docs --sync
+      - pip freeze
+
+sphinx:
+  configuration: docs/conf.py
