@@ -129,7 +129,7 @@ Use `StatelessModel` when:
 
 ## What comes next?
 
-`StatefulModel` gives a model its internal structure: the `State`, the [DAG](../variables/DAG), and typed access to variables. But it says nothing about **how the algorithm should use** that structure during optimization.
+`StatefulModel` gives a model its internal structure: the `State`, the [DAG](DAG.md), and typed access to variables. But it says nothing about **how the algorithm should use** that structure during optimization.
 
 That is the role of [`McmcSaemCompatibleModel`](McmcSaemCompatibleModel.md), which inherits from `StatefulModel` and adds the contract that the MCMC-SAEM algorithm expects: computing sufficient statistics, updating parameters, and injecting data into the state.
 

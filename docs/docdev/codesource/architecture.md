@@ -1,6 +1,6 @@
 # Architecture & Data Flow
 
-This section provides a simplified explanation of Leaspy's internal architecture from a code perspective. We will start with a high-level diagram to give you a global overview and a starting point. Then, we will break it down part by part with more details. By the end, you will understand the architecture, how it works, and how the different functions interact.
+This section provides a simplified explanation of Leaspy's internal architecture from a code perspective. Even if this guide could seem long and tedious, we simplified the work for over 200 files and dousents of functions in just some modules. You have two ways to read it: taking a look to the simplified versions here, or take a look to the modules you want to have a deeper inderstanding about how works leaspy inside. If you are not going to developpe new features/methods, the overview is enough, 
 
 Key steps include:
 1.  **Data Preparation**: Adapting raw data and putting it into the `Data` format.
@@ -92,46 +92,27 @@ When you create your model and you fit it a lot happens under the hood. For inst
 
 Here is the inheritance chain for the Logistic model. You can click on the nodes to see the details of each class.
 
-```{mermaid}
-%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '18px', 'fontFamily': 'arial', 'lineWidth': '3px' }}}%%
-flowchart TD
-    %% Styling Definitions
-    classDef interface fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,rx:5,ry:5;
-    classDef base fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C,rx:5,ry:5;
-    classDef mixin fill:#F3E5F5,stroke:#4A148C,stroke-width:2px,color:#4A148C,rx:5,ry:5;
-    classDef impl fill:#E3F2FD,stroke:#0D47A1,stroke-width:3px,color:#0D47A1,rx:5,ry:5;
+The diagram in the "Simplified version" tab highlights the essential modules for a standard logistic regression execution, offering a cleaner starting point. The "Complete version" shows the full inheritance hierarchy.
 
-    %% Nodes
-    Interface["ModelInterface"]:::interface
-    Base["BaseModel"]:::base
-    Stateful["StatefulModel"]:::base
-    SAEM["McmcSaemCompatibleModel"]:::base
-    Time["TimeReparametrizedModel"]:::base
-    Rieman["RiemanianManifoldModel"]:::base
-    Mixin["LogisticInitializationMixin"]:::mixin
-    Logistic["LogisticModel"]:::impl
-
-    %% Links
-    Interface --> Base
-    Base --> Stateful
-    Stateful --> SAEM
-    SAEM --> Time
-    Time --> Rieman
-    Rieman --> Logistic
-    Mixin --> Logistic
-
-    %% Click Interactions (Links to module documentation)
-    click Interface "logistic/ModelInterface.html" "Go to ModelInterface"
-    click Base "logistic/BaseModel.html" "Go to BaseModel"
-    click Stateful "logistic/StatefulModel.html" "Go to StatefulModel"
-    click SAEM "logistic/McmcSaemCompatibleModel.html" "Go to McmcSaemCompatibleModel"
-    click Time "logistic/TimeReparametrizedModel.html" "Go to TimeReparametrizedModel"
-    click Rieman "logistic/RiemanianManifoldModel.html" "Go to RiemanianManifoldModel"
-    click Mixin "logistic/LogisticInitializationMixin.html" "Go to LogisticInitializationMixin"
-    click Logistic "logistic/LogisticModel.html" "Go to LogisticModel"
+`````{tabs}
+````{tab} Simplified version
+```{image} ../../_static/images/arch1.png
+:alt: Simplified Inheritance Diagram
+:align: center
+:width: 50%
 ```
+````
 
-This diagram is clickable. If you want more details about a specific module, you can click on it. For now, let's start with the base of the inheritance chain: [`ModelInterface`](logistic/ModelInterface).
+````{tab} Complete version
+```{image} ../../_static/images/arch2.png
+:alt: Complete Inheritance Diagram
+:align: center
+:width: 100%
+```
+````
+`````
+
+If you want more details about a specific module, you can click on its corresponding node in the index. For now, let's start with the base of the inheritance chain: [`ModelInterface`](logistic/ModelInterface.md).
 
 ## Why This Architecture?
 
@@ -140,4 +121,20 @@ While you could theoretically write a `LogisticModel` as one massive 5000-line c
 *   **Reusability**: `LinearModel` and `JointModel` reuse 90% of the same code as `LogisticModel` (parameter storage, algorithm compatibility). They only override the final mathematical formulas.
 *   **Extensibility**: If you want to create a model with a different time behavior, you don't start from scratch. You might branch off after `McmcSaemCompatibleModel` and implement your own time reparameterization, while keeping all the algorithm compatibility for free.
 
+
 This "layer" approach means complex features (like Riemannian manifold geometry or MCMC sampling) are implemented once and shared across all models, rather than being copy-pasted into every new model type.
+
+You can read the **Simplified Overview** below for a quick summary of how all these pieces fit together, or follow the path in the table of contents to explore each module in depth one by one.
+
+```{dropdown} Simplified Overview
+:color: primary
+:icon: info
+
+To perform a logistic regression, Leaspy coordinates a stack of specialized modules that transform raw data into a mathematical trajectory.
+
+**The Mathematical Core**
+It begins with the **Observation Model**, which links your noisy measurements to the theoretical curves. Underlying this is the **Logistic Model**, which imposes the specific S-shape of the progression, supported by the **Riemannian Manifold Model** which handles the geometric mixing of multiple biomarkers. The **Time Reparametrized Model** personalizes this process by warping the timeline for each subject.
+
+**The Software Infrastructure**
+Supporting this math is a robust backend. **ModelInterface** and **BaseModel** define the standard blueprint and orchestration logic (like `.fit()`). **StatefulModel** acts as the model's memory, holding the actual values of parameters during execution. Finally, **McmcSaemCompatibleModel** acts as a translator, ensuring the model provides the specific statistics needed by the generic MCMC-SAEM optimization algorithm.
+```

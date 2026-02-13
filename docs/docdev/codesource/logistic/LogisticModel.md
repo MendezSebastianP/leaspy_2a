@@ -5,7 +5,7 @@
 
 The `LogisticModel` is the concrete implementation that defines the **shape** of disease progression as a logistic sigmoid curve. Building on the geometric framework of [`RiemanianManifoldModel`](RiemanianManifoldModel.md), it specifies the actual equation that transforms the reparametrized time into biomarker values.
 
-This is the most commonly used shape in Leaspy, suitable for biomarkers that follow an S-shaped trajectory from normality (0) to pathology (1) — or vice versa.
+This is the most commonly used shape in Leaspy, suitable for biomarkers that follow an S-shaped trajectory from normality (0) to pathology (1).
 
 ## The Mathematical Shape
 
@@ -43,11 +43,10 @@ The core contribution of this class is defining the function $S(t)$ and the metr
 Because non-linear models are sensitive to starting values, this class inherits initialization logic from `LogisticInitializationMixin`.
 This separation keeps the *model definition* clean from the *heuristic estimation* code.
 
-> **Curious about how start values are guessed?**
 > See [`LogisticInitializationMixin`](LogisticInitializationMixin.md) for details on how we estimate initial `g`, `v0`, and `tau` from raw data before the main algorithm runs.
 
 ## Next Steps
 
 This concludes the logistic model definition hierarchy.
-*   To understand how this model connects to noisy data, you might look at **Observation Models** (e.g., `GaussianObservationModel`).
+*   To understand how this model connects to noisy data, you might look at [Observation Models](ObservationModel.md).
 *   To see how parameters are estimated, look at the **Algorithms** (e.g., `McmcSaem`).

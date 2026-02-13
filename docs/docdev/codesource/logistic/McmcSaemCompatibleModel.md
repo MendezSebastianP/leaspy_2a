@@ -5,7 +5,7 @@
 
 `document: leaspy.models.mcmc_saem_compatible.McmcSaemCompatibleModel`
 
-[`StatefulModel`](StatefulModel.md) gives a model its internal variable representation (the `State` and [DAG](../variables/DAG)). But that alone does not tell the algorithm **how to use** those variables during optimization.
+[`StatefulModel`](StatefulModel.md) gives a model its internal variable representation (the `State` and [DAG](DAG.md)). But that alone does not tell the algorithm **how to use** those variables during optimization.
 
 `McmcSaemCompatibleModel` bridges this gap. It defines the **contract** that the MCMC-SAEM algorithm expects: how to compute statistics, how to update parameters, and how to inject data and individual parameters into the state.
 
@@ -78,7 +78,7 @@ The constructor accepts one or more `ObservationModel` objects, which define:
 - The **noise distribution** (e.g., Gaussian with learned `noise_std`).
 - The **likelihood function** that produces `nll_attach` (negative log-likelihood of the data given the model prediction).
 
-These observation models contribute their own variables to the DAG (via `obs_model.get_variables_specs()`), which is why observation-related variables like `y`, `nll_attach_ind`, and `nll_attach` appear in the [logistic model's DAG](../variables/DAG).
+These observation models contribute their own variables to the DAG (via `obs_model.get_variables_specs()`), which is why observation-related variables like `y`, `nll_attach_ind`, and `nll_attach` appear in the [logistic model's DAG](DAG.md).
 
 ### Hyperparameter Loading
 
@@ -91,7 +91,7 @@ These observation models contribute their own variables to the DAG (via `obs_mod
 - `t`: a `DataVariable` for timepoints.
 - Variables from each observation model (data variable for observations, `nll_attach`, etc.).
 
-Subclasses like `TimeReparametrizedModel` then call `super().get_variables_specs()` and add their own variables on top (see [DAG – How VariablesDAG is built](../variables/DAG)).
+Subclasses like `TimeReparametrizedModel` then call `super().get_variables_specs()` and add their own variables on top (see [DAG – How VariablesDAG is built](DAG.md)).
 
 ### Individual Trajectory Computation
 
