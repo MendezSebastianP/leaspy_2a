@@ -1,6 +1,6 @@
 # Architecture & Data Flow
 
-This section provides a simplified explanation of Leaspy's internal architecture from a code perspective. Even if this guide could seem long and tedious, we simplified the work for over 200 files and dousents of functions in just some modules. You have two ways to read it: taking a look to the simplified versions here, or take a look to the modules you want to have a deeper inderstanding about how works leaspy inside. If you are not going to developpe new features/methods, the overview is enough, 
+This section provides a simplified explanation of Leaspy's internal architecture from a code perspective. Even if this guide could seem long and tedious, we simplified the work for over 200 files and dousents of functions in just some modules. You have two ways to read it: taking a look to the simplified versions here, or take a look to the modules you want to have a deeper inderstanding about how works leaspy inside. If you are not going to developpe new features/methods, the overview is enough.
 
 Key steps include:
 1.  **Data Preparation**: Adapting raw data and putting it into the `Data` format.
@@ -17,9 +17,9 @@ When you run a method, a lot happens under the hood. Here is a simplified code s
 from leaspy.io.data import Data
 from leaspy.models import LogisticModel
 
-data = Data.from_dataframe(alzheimer_df) # Data part
+data = Data.from_dataframe(alzheimer_df)		# Data part
 model = LogisticModel(name="test-model", 
-	source_dimension=2)					# Model creation
+	source_dimension=2)			# Model creation
 model.fit(data, "mcmc_saem", seed=42,
     n_iter=100,progress_bar=False)		# Fitting
 ```
@@ -90,9 +90,7 @@ This example allows us to see how is structured a module, we will go deeper in t
 
 When you create your model and you fit it a lot happens under the hood. For instance `LogisticModel` inherits methods and attributes from other classes in a chain. `LogisticModel` inherits from `RiemanianManifoldModel`, which inherits from other classes, and so on. 
 
-Here is the inheritance chain for the Logistic model. You can click on the nodes to see the details of each class.
-
-The diagram in the "Simplified version" tab highlights the essential modules for a standard logistic regression execution, offering a cleaner starting point. The "Complete version" shows the full inheritance hierarchy.
+Here is the inheritance chain for the Logistic model. You can click on the nodes to see the details of each class. The diagram in the "Simplified version" tab highlights the essential modules for a standard logistic regression execution, offering a cleaner starting point. The "Complete version" shows the full inheritance hierarchy.
 
 `````{tabs}
 ````{tab} Simplified version
@@ -107,12 +105,12 @@ The diagram in the "Simplified version" tab highlights the essential modules for
 ```{image} ../../_static/images/arch2.png
 :alt: Complete Inheritance Diagram
 :align: center
-:width: 100%
+:width: 80%
 ```
 ````
 `````
 
-If you want more details about a specific module, you can click on its corresponding node in the index. For now, let's start with the base of the inheritance chain: [`ModelInterface`](logistic/ModelInterface.md).
+
 
 ## Why This Architecture?
 
@@ -138,3 +136,5 @@ It begins with the **Observation Model**, which links your noisy measurements to
 **The Software Infrastructure**
 Supporting this math is a robust backend. **ModelInterface** and **BaseModel** define the standard blueprint and orchestration logic (like `.fit()`). **StatefulModel** acts as the model's memory, holding the actual values of parameters during execution. Finally, **McmcSaemCompatibleModel** acts as a translator, ensuring the model provides the specific statistics needed by the generic MCMC-SAEM optimization algorithm.
 ```
+
+If you want more details about a specific module, you can click on its corresponding node in the index. For now, let's start with the base of the inheritance chain: [`ModelInterface`](logistic/ModelInterface.md).

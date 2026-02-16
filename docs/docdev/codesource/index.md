@@ -9,12 +9,12 @@ This section contains a detailed analysis of the Leaspy source code structure, e
 architecture
 logistic/ModelInterface
 logistic/BaseModel
-logistic/LogisticInitializationMixin
 logistic/StatefulModel
 logistic/McmcSaemCompatibleModel
 logistic/TimeReparametrizedModel
 logistic/RiemanianManifoldModel
 logistic/LogisticModel
+logistic/LogisticInitializationMixin
 logistic/ObservationModel
 logistic/DAG
 io/Data

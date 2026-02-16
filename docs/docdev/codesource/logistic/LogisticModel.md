@@ -12,13 +12,23 @@ This is the most commonly used shape in Leaspy, suitable for biomarkers that fol
 The core contribution of this class is defining the function $S(t)$ and the metric $g(p)$.
 
 1.  **The Logistic Function**:
+    
     The model assumes that after time reparametrization and spatial mixing, the value of the $k$-th feature follows:
-    $$ y_k(t) = \frac{1}{1 + g_k \exp(-v_{0,k} \cdot \tilde{t}_k)} $$
+
+    $$
+    y_k(t) = \frac{1}{1 + g_k \exp(-v_{0,k} \cdot \tilde{t}_k)} 
+    $$
+
     where $\tilde{t}_k$ includes time shifts and spatial source effects.
 
 2.  **The Metric**:
+
     To be consistent with this shape, the Riemannian metric is defined as:
-    $$ G_k(p) = \frac{(1+p_k)^2}{p_k} $$
+
+    $$ 
+    G_k(p) = \frac{(1+p_k)^2}{p_k} 
+    $$
+
     This metric ensures that the logistic curves are indeed geodesics (shortest paths) on the manifold equipped with this geometry.
 
 ## Responsibilities

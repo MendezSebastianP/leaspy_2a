@@ -58,40 +58,25 @@ Finally, `BaseModel` instantiates the requested algorithm (e.g., MCMC-SAEM) and 
 
 See [`McmcSaemCompatibleModel`](McmcSaemCompatibleModel.md) to understand how the algorithm interacts with the model during the optimization loop.
 
-## Dimension vs Features: Two Paths to Model Configuration
+## Dimension vs Features: Providing the Output Structure
 
-Models can be configured through two equivalent approaches:
+It is crucial to distinguish between two concepts:
+1.  **Output Dimension (N)**: The number of observed variables (e.g., test scores) you want to predict.
+2.  **Source Dimension (K)**: The number of independent drivers (latent sources) in the model. *This is a separate hyperparameter.*
+
+When configuring the model, you are setting the **Output Dimension**:
 
 ```python
-# Approach 1: Explicit dimension (features determined later from data)
-model = LogisticModel(name="test-model", source_dimension=2)
+# Approach 1: Explicit dimension (names inferred later from data)
+model = LogisticModel(name="test-model", dimension=4, source_dimension=2)
 
-# Approach 2: Named features (dimension inferred as len(features))
-model = LogisticModel(name="test-model", features=["memory", "language"])
+# Approach 2: Explicit names (dimension inferred from list length)
+model = LogisticModel(name="test-model", features=["memory", "language", "motor", "behavior"], source_dimension=2)
 ```
 
-Both approaches tell the model "predict 2 values at each timepoint," but differ in when feature names are resolved. With Approach 1, feature names are extracted from your data's columns during `initialize()`. With Approach 2, you specify them upfront and the model validates that your data matches.
-
-This distinction matters for two reasons:
-
-**Parameter allocation**: If your model has dimension 2, parameters like `g` (noise levels) will have 2 elements, one per feature. The algorithm needs to know this size to allocate memory and perform computations correctly.
-
-<br>
-
-<div style="background-color: #f0f7ff; padding: 15px; border-left: 5px solid #0078d4; border-radius: 5px;">
-<strong>Want to see the Algorithm Loop?</strong><br>
-The complex "Simulate → Compute Statistics → Update Parameters" loop is not in BaseModel. It lives in the Algorithm classes and relies on methods defined in <a href="McmcSaemCompatibleModel.md#the-algorithms-loop-infrastructure-vs-interface">McmcSaemCompatibleModel</a>.
-</div>
-
-## Why fit() Appears Twice in the Code
-
-If you examine `base.py`, you'll notice `fit()` is declared in two places:
-
-**First declaration** (~line 167): This is in the abstract `ModelInterface` class. It defines the method signature and raises `NotImplementedError`. This is a **contract** that says "every Leaspy model must provide a `fit()` method with these parameters."
-
-**Second declaration** (~line 713): This is in the concrete `BaseModel` class. It contains the **actual implementation** — the three-step orchestration described above.
-
-This pattern (interface + implementation) ensures consistent APIs across all models while allowing BaseModel to provide shared orchestration logic that subclasses inherit automatically.
+In both cases, we are telling the model: *"You will predict 4 outputs."*
+*   **Approach 1**: The model waits until `fit(data)` to learn that the column names are "memory", "language", etc.
+*   **Approach 2**: The model knows the names immediately. This is safer because it will throw an error if you accidentally pass a dataset with columns ["A", "B", "C", "D"] instead of the expected ["memory", ...].
 
 ## From Abstract to Concrete: The Inheritance Chain
 
@@ -103,7 +88,3 @@ BaseModel is abstract — you cannot instantiate it directly. Concrete models li
 - **LogisticModel**: Implements the logistic sigmoid equation and parameter initialization
 
 Each layer fulfills part of the contract BaseModel established. By the time you reach LogisticModel, all abstract methods have concrete implementations. This allows the algorithm to call methods like `compute_individual_trajectory()` and receive actual predictions based on the logistic curve formula.
-
-See the [inheritance diagram](../architecture.md) to visualize the complete
-
-See the [inheritance diagram](../architecture.md) to understand the full chain from BaseModel to LogisticModel.

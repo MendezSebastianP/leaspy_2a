@@ -30,17 +30,20 @@ Any valid Leaspy model must provide implementations for these capabilities:
 ### I/O
 *   **`save(path)`** & **`load(path)`**: Serialize the model to/from JSON files for storage.
 
-## Interface vs. Abstract Class: What's the Difference?
+## The Hierarchy: Interface, Base, and Concrete Models
 
-You might hear both terms used. In Python, the distinction is often subtle because both use the `abc` (Abstract Base Class) module, but the *intent* is different:
+In Leaspy, we organize models into a hierarchy to separate the "rules" from the bit-by-bit "implementation".
 
-*   **Interface (`ModelInterface`)**: Pure contract. It contains **no logic**, only method signatures marked with `@abstractmethod`. It says "You *must* implement these methods," but doesn't help you do it.
-*   **Abstract Class (`BaseModel`)**: Partial implementation. It obeys the interface but also provides shared code (like the `fit` orchestration). It cannot be used directly because it's still missing pieces (like the specific equation formulas), but it does a lot of the heavy lifting for its subclasses.
+1.  **The Contract (`ModelInterface`)**:
+    This is the strict rulebook. It defines *what* a model must do (like `fit` or `personalize`) but contains **no logic**. It ensures that every Leaspy model looks the same to the outside world.
 
-In Leaspy architecture:
-1.  `ModelInterface` defines the strict rules.
-2.  `BaseModel` implements the common rules.
-3.  `LogisticModel` implements the specific rules.
+2.  **The Foundation (Intermediate classes)**:
+    These classes (`BaseModel`, `TimeReparametrizedModel`, `RiemanianManifoldModel`) sit between the interface and the final model. They are a **mix of implementation and definition**:
+    *   **They implement key logic**: They handle file storage, input validation, and the core algorithms like time reparametrization ($ \alpha(t - \tau) $).
+    *   **They leave specific "holes"**: They define *abstract methods* for the parts that vary, such as the shape of the manifold or the specific reaction to time. This forces the final model to provide just these missing pieces.
+
+3.  **The Concrete Model (`LogisticModel`)**:
+    This is the final, usable model. It inherits all the structural logic from the foundation and fills in the specific mathematical "holes" — for example, defining the logistic sigmoid function $ \frac{1}{1 + e^{-x}} $ as the shape of the manifold.
 
 ## Why Do We Need This?
 
