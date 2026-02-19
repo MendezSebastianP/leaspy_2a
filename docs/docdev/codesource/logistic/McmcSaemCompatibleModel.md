@@ -34,58 +34,9 @@ Beyond the optimization loop, this class handles:
 
 The following diagram illustrates how the MCMC-SAEM algorithm interacts with this interface at each iteration:
 
-```mermaid
-%%{init: {
-  "themeVariables": {
-    "clusterBkg": "rgba(227, 242, 253, 0.6)",
-    "clusterBorder": "#90caf9",
-    "clusterTextColor": "#0d47a1",
-    "fontSize": "14px"
-  },
-  "flowchart": {"rankSpacing":15, "nodeSpacing":15}
-}}%%
-graph TD
-    %% Node styles
-    classDef process fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1,rx:10,ry:10;
-    classDef decision fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:#01579b,rx:10,ry:10;
-    classDef math fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c,rx:10,ry:10;
-    classDef io fill:#fffde7,stroke:#fbc02d,color:#f57f17,rx:10,ry:10;
-
-    Start((Start)) --> Init[Initialize State]:::process
-    Init --> Loop{{Loop k = 1 to N}}:::decision
-    
-    %% --- E-Step ---
-    subgraph Estep["<b>1. E-Step: Sampling</b>"]
-        direction TB
-        Loop --> SelectVar["Select ϑ ∈ {τ, ξ, …}"]:::process
-        SelectVar --> Propose["Propose ϑ*"]:::math
-        Propose --> Fork["Fork State"]:::process
-        Fork --> Alpha["Compute α = min(1, exp(−ΔH / T))"]:::math
-        Alpha --> Accept{"Accept?"}:::decision
-        
-        Accept -- Yes --> Keep["Update State S ← S*"]:::process
-        Accept -- No --> Revert["Revert State"]:::process
-        
-        Keep --> DoneVars{All vars?}:::decision
-        Revert --> DoneVars
-        DoneVars -- No --> SelectVar
-    end
-    style Estep fill:#e3f2fd,stroke:#90caf9,stroke-width:2px,color:#0d47a1;
-
-    %% --- M-Step ---
-    subgraph Mstep["<b>2. M-Step: Maximization</b>"]
-        direction TB
-        DoneVars -- Yes --> SuffStats["Sufficient Stats S<sub>k</sub>"]:::math
-        SuffStats --> SAEM["Update Memory<br/>S<sub>k</sub> ← (1−γ<sub>k</sub>)S<sub>k−1</sub> + γ<sub>k</sub>S(v)"]:::math
-        SAEM --> Update["Maximization<br/>θ<sub>k+1</sub> = arg max P(θ | S<sub>k</sub>)"]:::math
-        Update --> Anneal["Decrease T"]:::process
-    end
-    style Mstep fill:#e3f2fd,stroke:#90caf9,stroke-width:2px,color:#0d47a1;
-
-    Anneal --> Converged{Converged?}:::decision
-    Converged -- No --> Loop
-    Converged -- Yes --> End((End))
-    
-    class Start,End process
+```{image} ../../../_static/images/mcmc.png
+:alt: mcmc
+:align: center
+:width: 80%
 ```
 
