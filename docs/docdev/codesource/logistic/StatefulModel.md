@@ -27,6 +27,8 @@ Think of the State as a **Smart Dictionary** that imposes strict rules:
     - If you **Accept** (Keep): You simply do nothing. The current state is already updated with the new value.
     - If you **Reject**: You **Revert** the State instantly to its previous values. It works like an "Undo" button.
 
+> The "time machine" part uses a Computer Sciences concept called `fork`, and it is implemented in `src/leaspy/variables/state.py` when a changement of state is detected.
+
 ### Responsibilities of `StatefulModel`
 
 While `BaseModel` handles the outer workflow (files, algorithms), `StatefulModel` manages the **internal physics**:

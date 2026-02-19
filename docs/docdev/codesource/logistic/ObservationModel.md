@@ -1,55 +1,31 @@
 # Observation Models
 
-**Modules:** `leaspy.models.obs_models._base`, `leaspy.models.obs_models._gaussian`
+**Modules:** `leaspy.models.obs_models`
 
-While the [`LogisticModel`](LogisticModel.md) defines the **hidden physiological process** (the smooth, noise-free trajectory of the disease), it doesn't describe the **data** directly. Real-world data is noisy and discrete.
-
-The **Observation Model** is the bridge between the clean theoretical curve and the messy reality. It defines the probability distribution of the observed data given the model's prediction.
+While the **Logistic Model** defines the ideal, noise-free disease trajectory, real-world data is messy. The **Observation Model** bridges this gap by defining the probability of observing specific data points given the model's prediction:
 
 $$ P(y_{observed} | y_{model}) $$
 
 ## The Abstract Base: `ObservationModel`
 
-**Module:** `leaspy.models.obs_models._base`
+This interface describes how data "attaches" to the model, formally defining the **Negative Log-Likelihood (NLL)** that algorithms minimize. Its main responsibilities are:
 
-This class defines the interface for how data attaches to the model. In a probabilistic framework, this is often formalized as the **Negative Log-Likelihood (NLL)**.
+1.  **Data Connection**: Extracts relevant features from the raw `Dataset`.
+2.  **Likelihood Computation**: Defines the statistical distribution (e.g., Gaussian, Poisson) of the residuals.
+3.  **Variable Generation**: Creates the `nll_attach` variables in the computational graph (DAG).
 
-### Responsibilities
-*   **Data Retrieval**: Knows how to extract specific information from the raw `Dataset` (via a `getter`).
-*   **Likelihood Computation**: Defines the symbolic distribution (e.g., Normal, Poisson) used to compute how "likely" the data is given the model's parameters.
-*   **Variable Connection**: Generates the `nll_attach` variables that the optimization algorithms minimize.
+## The Standard: `GaussianObservationModel`
 
-### Key Attributes
-*   `name`: The name of the observed variable (usually "y").
-*   `dist`: A `SymbolicDistribution` object representing the statistical assumption (e.g., `Normal(loc="model", scale="noise_std")`).
-
----
-
-## The Concrete Implementation: `GaussianObservationModel`
-
-**Module:** `leaspy.models.obs_models._gaussian`
-**Inherits from:** `ObservationModel`
-
-This is the standard observation model used in Leaspy. It assumes that the observed data is just the model prediction plus some Gaussian noise.
+Leaspy primarily uses a Gaussian observation model. It assumes that the observed data is simply the model's prediction plus random noise:
 
 $$ y_{observed} = y_{model}(t) + \epsilon, \quad \epsilon \sim \mathcal{N}(0, \sigma^2) $$
 
-### Responsibilities
-*   **Noise Management**: It manages the `noise_std` parameter ($\sigma$).
-*   **Residual Calculation**: It computes the squared differences between the model and the data (L2 norm) which drives the fitting process.
+### Handling Noise (`FullGaussianObservationModel`)
 
-### `FullGaussianObservationModel`
-A specialized subclass that handles the most common case:
-*   **Scalar Noise**: One global $\sigma$ for all features (homoscedasticity).
-*   **Diagonal Noise**: One distinct $\sigma_k$ per feature (heteroscedasticity across features).
+The estimation of the noise level $\sigma$ is integrated directly into the model fitting (in the M-step). We support two different noise structures, regardless of how many features the model has:
 
-It includes the **update rules** for estimating this noise variance during the MCMC-SAEM algorithm (M-step).
+*   **Scalar Noise (Homoscedastic)**: The model estimates a **single global $\sigma$** shared by all features. This constrains the model to assume that every biomarker has the same noise level.
+*   **Diagonal Noise (Heteroscedastic)**: The model estimates a **distinct $\sigma_k$ for each feature**. This is crucial for multivariate models where some sources of data might be much noisier than others.
 
-### Key Methods
-*   `noise_std_specs(dimension)`: Defines whether the noise is scalar (dim=1) or diagonal (dim>1).
-*   `scalar_noise_std_update(...)`: Closed-form formula to update the global noise variance based on the residuals.
-*   `diagonal_noise_std_update(...)`: Closed-form formula to update feature-specific noise variances.
-
-## Next Steps
-
-Now that the Model (signal) and Observation (noise) are defined, the [McmcSaemCompatibleModel](McmcSaemCompatibleModel.md) ties them together to enable the actual fitting process.
+**Why does this matter?**
+The noise level acts as a natural "weighting" mechanism. The algorithm tries to minimize the error normalized by the noise ($\frac{\text{error}^2}{\sigma^2}$). If the model learns that Feature A is very noisy (large $\sigma_A$) and Feature B is clean (small $\sigma_B$), it will prioritize fitting Feature B accurately, while being more forgiving of deviations in Feature A.
