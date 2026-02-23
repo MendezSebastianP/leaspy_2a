@@ -15,7 +15,7 @@ We separate this logic from the main `LogisticModel` class for two reasons:
 ## Key Methods
 
 *   **`_compute_initial_values_for_model_parameters(self, dataset)`**:
-    This is the workhorse method. It performs a lightweight analysis of your dataset to guess likely parameter values:
+    This is the workhorse method. It performs a lightweight analysis of your dataset to guess likely parameter values, each calculation is made thanks to some functions in `src/leaspy/models/utilities.py`, which are a set of loose functions:
     1.  **Slopes $\to$ Velocity ($v_0$)**: It computes linear regression slopes for each patient to estimate the average progression speed.
     2.  **Values $\to$ Shift ($g$)**: It looks at the value distribution to estimate where the curve sits (the $g$ parameter).
     3.  **Times $\to$ Time Shift ($\tau$)**: It uses the mean age of patients to center the time shifts.
