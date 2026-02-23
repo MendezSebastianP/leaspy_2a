@@ -146,6 +146,7 @@ class McmcSaemCompatibleModel(StatefulModel):
         Returns
         -------
         :obj:`list` [:obj:`str`] :
+
             The names of the observation models.
         """
         return [model.to_string() for model in self.obs_models]
@@ -153,6 +154,7 @@ class McmcSaemCompatibleModel(StatefulModel):
     def has_observation_model_with_name(self, name: str) -> bool:
         """
         Check if the model has an observation model with the given name.
+
         Parameters
         ----------
         name : :obj:`str`
@@ -160,7 +162,7 @@ class McmcSaemCompatibleModel(StatefulModel):
 
         Returns
         -------
-        :obj:`bool`:
+        bool
             True if the model has an observation model with the given name, False otherwise.
         """
         return name in self.observation_model_names
@@ -237,9 +239,11 @@ class McmcSaemCompatibleModel(StatefulModel):
         individual_parameters : :class:`~leaspy.utils.typing.DictParams`
             Contains some individual parameters.
             If representing only one individual (in a multivariate model) it could be:
+
                 * {'tau':0.1, 'xi':-0.3, 'sources':[0.1,...]}
 
             Or for multiple individuals:
+
                 * {'tau':[0.1,0.2,...], 'xi':[-0.3,0.2,...], 'sources':[[0.1,...],[0,...],...]}
 
             In particular, a sources vector (if present) should always be a array_like, even if it is 1D
@@ -247,6 +251,7 @@ class McmcSaemCompatibleModel(StatefulModel):
         Returns
         -------
         ips_info : :class:`~leaspy.utils.typing.KwargsType`
+
             * ``'nb_inds'`` : :obj:`int` >= 0
                 Number of individuals present.
             * ``'tensorized_ips'`` : :obj:`dict` [ :obj:`str`, :class:`torch.Tensor` ]
@@ -604,6 +609,7 @@ class McmcSaemCompatibleModel(StatefulModel):
         ----------
         state : :class:`~leaspy.variables.state.State`
             Instance holding values for all model variables (including latent individual variables), as well as:
+
             - timepoints : :class:`torch.Tensor` of shape (n_individuals, n_timepoints)
 
         timepoints : :class:`~leaspy.utils.weighted_tensor.WeightedTensor` or :class:`torch.Tensor`
@@ -634,6 +640,7 @@ class McmcSaemCompatibleModel(StatefulModel):
 
         state : :class:`~leaspy.variables.state.State`
             Instance holding values for all model variables (including latent individual variables), as well as:
+
             - timepoints : :class:`torch.Tensor` of shape (n_individuals, n_timepoints)
         dataset : :class:`~leaspy.io.data.dataset.Dataset`
             The dataset containing the data to be put in the state.
@@ -654,6 +661,7 @@ class McmcSaemCompatibleModel(StatefulModel):
         ----------
         state : :class:`~leaspy.variables.state.State`
             Instance holding values for all model variables (including latent individual variables), as well as:
+
             - timepoints : :class:`torch.Tensor` of shape (n_individuals, n_timepoints)
         """
         state["t"] = None

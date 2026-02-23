@@ -125,7 +125,23 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "auto_examples/*.py",
+    "auto_examples/*.ipynb",
+    "auto_examples/*.py.md5",
+    "auto_examples/*.codeobj.json",
+]
+
+show_warning_types = True
+
+suppress_warnings = [
+    "config.cache",  # sphinx_gallery_conf unpicklable
+    # "autoapi",      # only if you decide to silence AutoAPI warnings too
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "python3"
@@ -163,15 +179,8 @@ html_favicon = "_static/favicon.png"
 # further. For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "canonical_url": "",
-    "analytics_id": "",
-    "display_version": True,
     "collapse_navigation": True,
-    "sticky_navigation": True,
     "navigation_depth": 4,
-    "includehidden": True,
-    "titles_only": False,
-    "prev_next_buttons_location": None,
     # Logo and description
     # 'description': 'LEArning Spatiotemporal Patterns in Python',
     # 'logo_name': 'false',
