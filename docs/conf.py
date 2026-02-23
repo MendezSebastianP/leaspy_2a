@@ -134,6 +134,7 @@ exclude_patterns = [
     "auto_examples/*.ipynb",
     "auto_examples/*.py.md5",
     "auto_examples/*.codeobj.json",
+    "data_summary.ipynb",
 ]
 
 show_warning_types = True
@@ -179,8 +180,6 @@ html_favicon = "_static/favicon.png"
 # further. For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "collapse_navigation": True,
-    "navigation_depth": 4,
     # Logo and description
     # 'description': 'LEArning Spatiotemporal Patterns in Python',
     # 'logo_name': 'false',
