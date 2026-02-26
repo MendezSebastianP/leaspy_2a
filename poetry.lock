@@ -1023,25 +1023,6 @@ test-full = ["adlfs", "aiohttp (!=4.0.0a0,!=4.0.0a1)", "cloudpickle", "dask", "d
 tqdm = ["tqdm"]
 
 [[package]]
-name = "furo"
-version = "2025.9.25"
-description = "A clean customisable Sphinx documentation theme."
-optional = false
-python-versions = ">=3.8"
-groups = ["docs"]
-files = [
-    {file = "furo-2025.9.25-py3-none-any.whl", hash = "sha256:2937f68e823b8e37b410c972c371bc2b1d88026709534927158e0cb3fac95afe"},
-    {file = "furo-2025.9.25.tar.gz", hash = "sha256:3eac05582768fdbbc2bdfa1cdbcdd5d33cfc8b4bd2051729ff4e026a1d7e0a98"},
-]
-
-[package.dependencies]
-accessible-pygments = ">=0.0.5"
-beautifulsoup4 = "*"
-pygments = ">=2.7"
-sphinx = ">=6.0,<9.0"
-sphinx-basic-ng = ">=1.0.0.beta2"
-
-[[package]]
 name = "greenlet"
 version = "3.2.1"
 description = "Lightweight in-process concurrent programming"
@@ -3841,22 +3822,23 @@ numpy = ["nptyping (>=2.5)"]
 testing = ["covdefaults (>=2.3)", "coverage (>=7.4.4)", "defusedxml (>=0.7.1)", "diff-cover (>=9)", "pytest (>=8.1.1)", "pytest-cov (>=5)", "sphobjinv (>=2.3.1)", "typing-extensions (>=4.11)"]
 
 [[package]]
-name = "sphinx-basic-ng"
-version = "1.0.0b2"
-description = "A modern skeleton for Sphinx themes."
+name = "sphinx-copybutton"
+version = "0.5.2"
+description = "Add a copy button to each of your code cells."
 optional = false
 python-versions = ">=3.7"
 groups = ["docs"]
 files = [
-    {file = "sphinx_basic_ng-1.0.0b2-py3-none-any.whl", hash = "sha256:eb09aedbabfb650607e9b4b68c9d240b90b1e1be221d6ad71d61c52e29f7932b"},
-    {file = "sphinx_basic_ng-1.0.0b2.tar.gz", hash = "sha256:9ec55a47c90c8c002b5960c57492ec3021f5193cb26cebc2dc4ea226848651c9"},
+    {file = "sphinx-copybutton-0.5.2.tar.gz", hash = "sha256:4cf17c82fb9646d1bc9ca92ac280813a3b605d8c421225fd9913154103ee1fbd"},
+    {file = "sphinx_copybutton-0.5.2-py3-none-any.whl", hash = "sha256:fb543fd386d917746c9a2c50360c7905b605726b9355cd26e9974857afeae06e"},
 ]
 
 [package.dependencies]
-sphinx = ">=4.0"
+sphinx = ">=1.8"
 
 [package.extras]
-docs = ["furo", "ipython", "myst-parser", "sphinx-copybutton", "sphinx-inline-tabs"]
+code-style = ["pre-commit (==2.12.1)"]
+rtd = ["ipython", "myst-nb", "sphinx", "sphinx-book-theme", "sphinx-examples"]
 
 [[package]]
 name = "sphinx-gallery"
@@ -4621,4 +4603,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.14"
-content-hash = "99bace1474c942e4a010f7dd77aa1ddeefee6e2609e07804b2534251fe89808e"
+content-hash = "b56744a4283022f6f0f7c21fa58284b73750d4233834ff907ffbc63fcbfb522c"

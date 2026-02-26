@@ -24,31 +24,31 @@ print(alzheimer_df.head())
 
 
 # %%
-# ```{warning}
-# You **MUST** include both `ID` and `TIME`, either as indices or as columns.
-# The remaining columns should correspond to the observed variables
-# (also called features or endpoints).
-# Each feature should have its own column, and each visit should occupy one row.
-# ```
+# .. warning::
+#
+#    You **MUST** include both ``ID`` and ``TIME``, either as indices or as columns.
+#    The remaining columns should correspond to the observed variables
+#    (also called features or endpoints).
+#    Each feature should have its own column, and each visit should occupy one row.
 
 
 # %%
-# ```{warning}
-# - Leaspy supports *linear* and *logistic* models.
-# - The features **MUST** be increasing over time.
-# - For logistic models, data must be rescaled between 0 and 1.
-# ```
+# .. warning::
+#
+#    - Leaspy supports *linear* and *logistic* models.
+#    - The features **MUST** be increasing over time.
+#    - For logistic models, data must be rescaled between 0 and 1.
 
 from leaspy.io.data import Data
 
 data = Data.from_dataframe(alzheimer_df)
 
 # %%
-# ```{seealso}
-# For a deeper understanding of the `Data` and `Dataset` classes, including
-# iteration, cofactors, and best practices, see the
-# [Data Containers Guide](../data_summary.ipynb).
-# ```
+# .. seealso::
+#
+#    For a deeper understanding of the ``Data`` and ``Dataset`` classes, including
+#    iteration, cofactors, and best practices, refer to the Data Containers Guide
+#    in the documentation.
 
 # %%
 # The core functionality of Leaspy is to estimate the group-average trajectory
@@ -79,10 +79,11 @@ print(individual_parameters.to_dataframe())
 # %%
 # We have seen how to fit a model and personalize it to individuals.
 # Leaspy also provides various plotting functions to visualize the results.
-# Let's  go to the next [section](./plot_02_parkinson_example) to see how to plot
+# Let's  go to the next :doc:`section <plot_02_parkinson_example>` to see how to plot
 # the group-average trajectory and the individual trajectories using the Parkinson's disease dataset.
+
 # %%
 # To go further:
 #
-# 1. See the [User Guide](../user_guide.md) and full API documentation.
-# 2. Explore additional [examples](./index.rst).
+# 1. See the :doc:`User Guide <../user_guide>` and full API documentation.
+# 2. Explore additional :doc:`examples <./index>`.

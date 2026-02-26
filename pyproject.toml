@@ -72,7 +72,7 @@ sphinx-autoapi = "*"
 myst-nb = "*"
 sphinxcontrib-bibtex = "*"
 pydata-sphinx-theme = "^0.16.1"
-furo = "^2025.9.25"
+sphinx-copybutton = "*"
 # Security fixes - prevent downgrades
 urllib3 = ">=2.6.3"
 requests = ">=2.32.5"
