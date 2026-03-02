@@ -50,6 +50,10 @@ model = JointModel(name="test_model", nb_events=1, source_dimension=2)
 model.fit(data, "mcmc_saem", seed=1312, n_iter=100, progress_bar=False)
 model.summary()
 
+# %%
+# We can also access the model information and parameters after fitting it to the data.
+model.info()
+
 
 # %%
 # The Joint Model includes specific parameters such as `log_rho_mean` and `zeta_mean`.

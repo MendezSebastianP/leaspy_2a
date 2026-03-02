@@ -68,6 +68,15 @@ model.fit(
 model.summary()
 
 # %%
+# The ``fit`` method estimates the parameters of the model, which are then accessible
+# through the ``summary`` method. The parameters are also stored in the ``parameters`` attribute of the model.
+
+model.info()
+
+# %%
+# The method ``info`` provides the model configuration and the settings used for the fit,
+# as well as the dataset information and the training information.
+#
 # Leaspy can also estimate the *individual trajectories* of each participant.
 # This is done using a personalization algorithm, here `scipy_minimize`:
 
