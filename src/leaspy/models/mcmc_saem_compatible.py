@@ -20,6 +20,7 @@ from leaspy.variables.state import State
 
 from .obs_models import ObservationModel
 from .stateful import StatefulModel
+from .summary import get_axis_labels
 
 __all__ = ["McmcSaemCompatibleModel"]
 
@@ -103,7 +104,7 @@ class McmcSaemCompatibleModel(StatefulModel):
             n_cols = 1
             if val.ndim == 1 and axes:
                 # Check if this axis produces labeled columns
-                if self._get_axis_labels(primary_axis, len(val)) is not None:
+                if get_axis_labels(primary_axis, len(val), self.features) is not None:
                     n_cols = len(val)
             elif val.ndim == 2:
                 n_cols = val.shape[1]
