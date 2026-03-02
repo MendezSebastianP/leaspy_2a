@@ -807,7 +807,7 @@ class BaseModel(ModelInterface):
         elapsed = time.perf_counter() - t0
 
         self.training_info["converged"] = getattr(algorithm, "converged", None)
-        self.training_info["duration"] = f"{elapsed:.1f}s"
+        self.training_info["duration"] = f"{elapsed:.3f}s"
         
     def info(self) -> Info:
         """Return model configuration and training context.

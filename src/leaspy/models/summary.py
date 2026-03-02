@@ -157,6 +157,13 @@ class AutoPrintMixin:
         object.__setattr__(self, "_printed", True)
         return str(self)
 
+    def _repr_html_(self) -> str:
+        """Rich HTML display for Jupyter notebooks (enables bold rendering)."""
+        object.__setattr__(self, "_printed", True)
+        text = str(self)
+        text = text.replace("\033[1m", "<b>").replace("\033[0m", "</b>")
+        return f"<pre style='font-family: monospace;'>{text}</pre>"
+
     def __getattribute__(self, name: str):
         value = object.__getattribute__(self, name)
         # Suppress auto-print once any public attribute is accessed
@@ -564,8 +571,6 @@ class Summary(AutoPrintMixin):
             lines.append(f"Iterations: {ti.get('n_iter', 'N/A')}")
             if ti.get("converged") is not None:
                 lines.append(f"Converged: {ti['converged']}")
-            if "duration" in ti:
-                lines.append(f"Duration: {ti['duration']}")
 
         # Data Context
         if self.dataset_info:
