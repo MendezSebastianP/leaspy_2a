@@ -828,40 +828,12 @@ class BaseModel(ModelInterface):
         >>> i.pct_missing             # 2.5
         >>> i.help()                  # list available attributes
         """
-        # Observation model names
-        obs_model_names = None
-        if hasattr(self, "obs_models"):
-            obs_model_names = [om.to_string() for om in self.obs_models]
-
-        # Parameter count
-        n_total_params = None
-        if self.parameters:
-            n_total_params = sum(p.numel() for p in self.parameters.values())
-
-        # Leaspy version
-        try:
-            from leaspy import __version__ as version
-        except ImportError:
-            version = None
-
-        return Info(
-            name=self.name,
-            model_type=self.__class__.__name__,
-            dimension=self.dimension,
-            features=self.features,
-            source_dimension=getattr(self, "source_dimension", None),
-            n_clusters=getattr(self, "n_clusters", None),
-            obs_models=obs_model_names,
-            n_total_params=n_total_params,
-            training_info=dict(self.training_info),
-            dataset_info=dict(self.dataset_info),
-            leaspy_version=version,
-        )
+        return Info.from_model(self)
 
     def summary(self) -> Summary:
         """Generate a structured summary of the model.
 
-        When called directly (e.g., `model.summary()`), prints a formatted summary.
+        When called directly (e.g., ``model.summary()``), prints a formatted summary.
         When stored in a variable, provides programmatic access to model attributes.
 
         Returns
@@ -881,63 +853,7 @@ class BaseModel(ModelInterface):
         >>> s.nll                     # Get specific value
         >>> s.help()                  # Show available attributes
         """
-        if not self.is_initialized:
-            raise LeaspyModelInputError("Model is not initialized. Call fit() first.")
-
-        if self.parameters is None or len(self.parameters) == 0:
-            raise LeaspyModelInputError("Model has no parameters. Call fit() first.")
-
-        # Get NLL if available
-        nll = None
-        if (fm := getattr(self, "fit_metrics", None)) and (nll_val := fm.get("nll_tot")):
-            nll = float(nll_val)
-
-        # Get observation model names if available
-        obs_model_names = None
-        if hasattr(self, "obs_models"):
-            obs_model_names = [om.to_string() for om in self.obs_models]
-
-        # Get leaspy version
-        try:
-            from leaspy import __version__ as version
-        except ImportError:
-            version = None
-
-        # Build parameters dictionary grouped by category
-        params_by_category = {}
-        if hasattr(self, "_param_categories"):
-            cats = self._param_categories
-            cat_names = {
-                "population": "Population Parameters",
-                "individual_priors": "Individual Parameters",
-                "noise": "Noise Model",
-            }
-            for cat_key, display_name in cat_names.items():
-                param_names = cats.get(cat_key, [])
-                if param_names:
-                    params_by_category[display_name] = {
-                        name: self.parameters[name] for name in param_names if name in self.parameters
-                    }
-        else:
-            # Fallback: all params under "Parameters"
-            params_by_category["Parameters"] = dict(self.parameters)
-
-        return Summary(
-            name=self.name,
-            model_type=self.__class__.__name__,
-            dimension=self.dimension,
-            features=self.features,
-            source_dimension=getattr(self, "source_dimension", None),
-            n_clusters=getattr(self, "n_clusters", None),
-            obs_models=obs_model_names,
-            nll=nll,
-            training_info=dict(self.training_info),
-            dataset_info=dict(self.dataset_info),
-            parameters=params_by_category,
-            leaspy_version=version,
-            _param_axes=getattr(self, "_param_axes", {}),
-            _feature_names=self.features,
-        )
+        return Summary.from_model(self)
 
     @staticmethod
     def _get_dataset(

@@ -11,9 +11,13 @@ Both classes auto-print when their return value is discarded (e.g.
 
 import textwrap
 from dataclasses import dataclass, field
-from typing import Any, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, Optional, TypedDict
 
+import numpy as np
 import torch
+
+if TYPE_CHECKING:
+    from leaspy.models.base import BaseModel
 
 __all__ = [
     "AutoPrintMixin",
@@ -22,7 +26,9 @@ __all__ = [
     "Summary",
     "TrainingInfo",
     "VisitsPerSubject",
+    "compute_bic",
     "get_axis_labels",
+    "get_number_of_parameters",
 ]
 
 
@@ -67,10 +73,7 @@ class TrainingInfo(TypedDict, total=False):
 # Shared utilities
 # ---------------------------------------------------------------------------
 
-# ANSI formatting constants
 _WIDTH = 80
-_BOLD = "\033[1m"
-_RESET = "\033[0m"
 
 
 def get_axis_labels(
@@ -157,19 +160,74 @@ class AutoPrintMixin:
         object.__setattr__(self, "_printed", True)
         return str(self)
 
-    def _repr_html_(self) -> str:
-        """Rich HTML display for Jupyter notebooks (enables bold rendering)."""
-        object.__setattr__(self, "_printed", True)
-        text = str(self)
-        text = text.replace("\033[1m", "<b>").replace("\033[0m", "</b>")
-        return f"<pre style='font-family: monospace;'>{text}</pre>"
-
     def __getattribute__(self, name: str):
         value = object.__getattribute__(self, name)
         # Suppress auto-print once any public attribute is accessed
         if not name.startswith("_") and name != "help":
             object.__setattr__(self, "_printed", True)
         return value
+
+
+# ---------------------------------------------------------------------------
+# Metric utilities
+# ---------------------------------------------------------------------------
+
+
+def get_number_of_parameters(model: "BaseModel") -> int:
+    """Calculate the number of free parameters of the model.
+
+    Uses the theoretical formula:
+    ``P = 3F + (F-1)*S + S*K + 4K``
+    where *F* = features, *S* = sources, *K* = clusters.
+
+    Parameters
+    ----------
+    model
+        A fitted Leaspy model instance.
+
+    Returns
+    -------
+    int
+        Number of free parameters.
+    """
+    n_features = getattr(model, "dimension", 0) or 0
+    n_sources = getattr(model, "source_dimension", 0) or 0
+    n_clusters = getattr(model, "n_clusters", 1) or 1
+
+    return (
+        (n_features * 3)
+        + ((n_features - 1) * n_sources)
+        + (n_sources * n_clusters)
+        + (n_clusters * 4)
+    )
+
+
+def compute_bic(
+    nll: float,
+    num_params: int,
+    n_subjects: int,
+) -> Optional[float]:
+    """Calculate the Bayesian Information Criterion (BIC).
+
+    ``BIC = 2 * nll + P * log(N)``
+
+    Parameters
+    ----------
+    nll : float
+        Negative log-likelihood (``nll_attach``).
+    num_params : int
+        Number of free parameters.
+    n_subjects : int
+        Number of subjects used for model fitting.
+
+    Returns
+    -------
+    float or None
+        The computed BIC, or ``None`` if inputs are invalid.
+    """
+    if n_subjects <= 0:
+        return None
+    return 2 * nll + num_params * np.log(n_subjects)
 
 
 # ---------------------------------------------------------------------------
@@ -201,10 +259,53 @@ class Info(AutoPrintMixin):
     n_clusters: Optional[int] = None
     obs_models: Optional[list[str]] = None
     n_total_params: Optional[int] = None
+    bic: Optional[float] = None
     training_info: TrainingInfo = field(default_factory=dict)
     dataset_info: DatasetInfo = field(default_factory=dict)
     leaspy_version: Optional[str] = None
     _printed: bool = field(default=False, repr=False)
+
+    # -- Factory -------------------------------------------------------------
+
+    @classmethod
+    def from_model(cls, model: "BaseModel") -> "Info":
+        """Build an :class:`Info` from a model instance."""
+        # Observation model names
+        obs_model_names = None
+        if hasattr(model, "obs_models"):
+            obs_model_names = [om.to_string() for om in model.obs_models]
+
+        # Parameter count & BIC
+        n_total_params = None
+        bic = None
+        if getattr(model, "parameters", None):
+            n_total_params = get_number_of_parameters(model)
+            fm = getattr(model, "fit_metrics", None) or {}
+            nll_val = fm.get("nll_attach", fm.get("nll_tot"))
+            n_subjects = model.dataset_info.get("n_subjects")
+            if nll_val is not None and n_subjects is not None:
+                bic = compute_bic(float(nll_val), n_total_params, n_subjects)
+
+        # Leaspy version
+        try:
+            from leaspy import __version__ as version
+        except ImportError:
+            version = None
+
+        return cls(
+            name=model.name,
+            model_type=model.__class__.__name__,
+            dimension=model.dimension,
+            features=model.features,
+            source_dimension=getattr(model, "source_dimension", None),
+            n_clusters=getattr(model, "n_clusters", None),
+            obs_models=obs_model_names,
+            n_total_params=n_total_params,
+            bic=bic,
+            training_info=dict(model.training_info),
+            dataset_info=dict(model.dataset_info),
+            leaspy_version=version,
+        )
 
     # -- Convenience properties: training ------------------------------------
 
@@ -282,11 +383,11 @@ class Info(AutoPrintMixin):
         sep = "=" * _WIDTH
 
         lines.append(sep)
-        lines.append(f"{_BOLD}{'Model Information':^{_WIDTH}}{_RESET}")
+        lines.append(f"{'Model Information':^{_WIDTH}}")
         lines.append(sep)
 
         # Statistical Model
-        lines.append(f"{_BOLD}Statistical Model{_RESET}")
+        lines.append("Statistical Model")
         lines.append("-" * _WIDTH)
         lines.append(f"Type: {self.model_type}")
         lines.append(f"Name: {self.name}")
@@ -296,14 +397,16 @@ class Info(AutoPrintMixin):
         if self.obs_models:
             lines.append(f"Observation Models: {', '.join(self.obs_models)}")
         if self.n_total_params is not None:
-            lines.append(f"Total Parameters: {self.n_total_params}")
+            lines.append(f"Parameters: {self.n_total_params}")
+        if self.bic is not None:
+            lines.append(f"BIC: {self.bic:.2f}")
         if self.n_clusters is not None:
             lines.append(f"Clusters: {self.n_clusters}")
 
         # Training Dataset
         if self.dataset_info:
             lines.append("")
-            lines.append(f"{_BOLD}Training Dataset{_RESET}")
+            lines.append("Training Dataset")
             lines.append("-" * _WIDTH)
             di = self.dataset_info
             lines.append(f"Subjects: {di.get('n_subjects', 'N/A')}")
@@ -327,7 +430,7 @@ class Info(AutoPrintMixin):
         # Training Details
         if self.training_info:
             lines.append("")
-            lines.append(f"{_BOLD}Training Details{_RESET}")
+            lines.append("Training Details")
             lines.append("-" * _WIDTH)
             ti = self.training_info
             lines.append(f"Algorithm: {ti.get('algorithm', 'N/A')}")
@@ -350,18 +453,18 @@ class Info(AutoPrintMixin):
     def help(self) -> None:
         """Print available attributes and their meanings."""
         help_text = f"""
-{_BOLD}Info Help{_RESET}
+Info Help
 {'=' * 60}
 
 The Info object provides access to model configuration and training context.
 
-{_BOLD}Usage:{_RESET}
+Usage:
     model.info()          # Print model information
     i = model.info()      # Store to access individual attributes
 
-{_BOLD}Available Attributes:{_RESET}
+Available Attributes:
 
-  {_BOLD}Model:{_RESET}
+  Model:
     name              Model name (str)
     model_type        Model class name (str)
     dimension         Number of features (int)
@@ -369,16 +472,17 @@ The Info object provides access to model configuration and training context.
     source_dimension  Number of sources (int or None)
     n_clusters        Number of clusters (int or None)
     obs_models        Observation model names (list[str] or None)
-    n_total_params    Total number of scalar parameters (int)
+    n_total_params    Number of free parameters (int)
+    bic               Bayesian Information Criterion (float or None)
 
-  {_BOLD}Training:{_RESET}
+  Training:
     algorithm         Algorithm name (str)
     seed              Random seed (int)
     n_iter            Number of iterations (int)
     converged         Whether training converged (bool or None)
     duration          Training duration (str)
 
-  {_BOLD}Dataset:{_RESET}
+  Dataset:
     n_subjects        Number of subjects (int)
     n_visits          Total visits (int)
     n_scores          Number of scored features (int)
@@ -388,12 +492,12 @@ The Info object provides access to model configuration and training context.
     visits_per_subject  Visit distribution stats (dict)
     n_events          Observed events, joint models only (int or None)
 
-  {_BOLD}Other:{_RESET}
+  Other:
     training_info     Full training metadata (TrainingInfo)
     dataset_info      Full dataset statistics (DatasetInfo)
     leaspy_version    Leaspy version (str)
 
-{_BOLD}Examples:{_RESET}
+Examples:
     >>> i = model.info()
     >>> i.algorithm              # 'mcmc_saem'
     >>> i.n_subjects             # 150
@@ -431,7 +535,9 @@ class Summary(AutoPrintMixin):
     source_dimension: Optional[int] = None
     n_clusters: Optional[int] = None
     obs_models: Optional[list[str]] = None
+    n_total_params: Optional[int] = None
     nll: Optional[float] = None
+    bic: Optional[float] = None
     training_info: TrainingInfo = field(default_factory=dict)
     dataset_info: DatasetInfo = field(default_factory=dict)
     parameters: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -439,6 +545,86 @@ class Summary(AutoPrintMixin):
     _param_axes: dict = field(default_factory=dict, repr=False)
     _feature_names: Optional[list[str]] = field(default=None, repr=False)
     _printed: bool = field(default=False, repr=False)
+
+    # -- Factory -------------------------------------------------------------
+
+    @classmethod
+    def from_model(cls, model: "BaseModel") -> "Summary":
+        """Build a :class:`Summary` from a model instance."""
+        from leaspy.exceptions import LeaspyModelInputError
+
+        if not model.is_initialized:
+            raise LeaspyModelInputError(
+                "Model is not initialized. Call fit() first."
+            )
+        if model.parameters is None or len(model.parameters) == 0:
+            raise LeaspyModelInputError(
+                "Model has no parameters. Call fit() first."
+            )
+
+        # NLL
+        nll = None
+        fm = getattr(model, "fit_metrics", None) or {}
+        if nll_val := fm.get("nll_tot"):
+            nll = float(nll_val)
+
+        # Parameter count & BIC
+        n_total_params = get_number_of_parameters(model)
+        bic = None
+        nll_bic = fm.get("nll_attach", fm.get("nll_tot"))
+        n_subjects = model.dataset_info.get("n_subjects")
+        if nll_bic is not None and n_subjects is not None:
+            bic = compute_bic(float(nll_bic), n_total_params, n_subjects)
+
+        # Observation model names
+        obs_model_names = None
+        if hasattr(model, "obs_models"):
+            obs_model_names = [om.to_string() for om in model.obs_models]
+
+        # Leaspy version
+        try:
+            from leaspy import __version__ as version
+        except ImportError:
+            version = None
+
+        # Group parameters by category
+        params_by_category = {}
+        if hasattr(model, "_param_categories"):
+            cats = model._param_categories
+            cat_names = {
+                "population": "Population Parameters",
+                "individual_priors": "Individual Parameters",
+                "noise": "Noise Model",
+            }
+            for cat_key, display_name in cat_names.items():
+                param_names = cats.get(cat_key, [])
+                if param_names:
+                    params_by_category[display_name] = {
+                        name: model.parameters[name]
+                        for name in param_names
+                        if name in model.parameters
+                    }
+        else:
+            params_by_category["Parameters"] = dict(model.parameters)
+
+        return cls(
+            name=model.name,
+            model_type=model.__class__.__name__,
+            dimension=model.dimension,
+            features=model.features,
+            source_dimension=getattr(model, "source_dimension", None),
+            n_clusters=getattr(model, "n_clusters", None),
+            obs_models=obs_model_names,
+            n_total_params=n_total_params,
+            nll=nll,
+            bic=bic,
+            training_info=dict(model.training_info),
+            dataset_info=dict(model.dataset_info),
+            parameters=params_by_category,
+            leaspy_version=version,
+            _param_axes=getattr(model, "_param_axes", {}),
+            _feature_names=model.features,
+        )
 
     # -- Convenience properties ----------------------------------------------
 
@@ -517,24 +703,22 @@ class Summary(AutoPrintMixin):
 
         # Header
         lines.append(sep)
-        lines.append(f"{_BOLD}{'Model Summary':^{_WIDTH}}{_RESET}")
+        lines.append(f"{'Model Summary':^{_WIDTH}}")
         lines.append(sep)
-        lines.append(f"{_BOLD}Model Name:{_RESET} {self.name}")
-        lines.append(f"{_BOLD}Model Type:{_RESET} {self.model_type}")
+        lines.append(f"Model Name: {self.name}")
+        lines.append(f"Model Type: {self.model_type}")
 
         if self.features is not None:
             feat_str = ", ".join(self.features)
             lines.extend(
-                _wrap_text(
-                    f"{_BOLD}Features ({self.dimension}){_RESET}", feat_str
-                )
+                _wrap_text(f"Features ({self.dimension})", feat_str)
             )
 
         if self.source_dimension is not None:
             sources = [f"Source {i} (s{i})" for i in range(self.source_dimension)]
             lines.extend(
                 _wrap_text(
-                    f"{_BOLD}Sources ({self.source_dimension}){_RESET}",
+                    f"Sources ({self.source_dimension})",
                     ", ".join(sources),
                 )
             )
@@ -543,26 +727,27 @@ class Summary(AutoPrintMixin):
             clusters = [f"Cluster {i} (c{i})" for i in range(self.n_clusters)]
             lines.extend(
                 _wrap_text(
-                    f"{_BOLD}Clusters ({self.n_clusters}){_RESET}",
+                    f"Clusters ({self.n_clusters})",
                     ", ".join(clusters),
                 )
             )
 
         if self.obs_models:
             lines.extend(
-                _wrap_text(
-                    f"{_BOLD}Observation Models{_RESET}",
-                    ", ".join(self.obs_models),
-                )
+                _wrap_text("Observation Models", ", ".join(self.obs_models))
             )
 
         if self.nll is not None:
-            lines.append(f"{_BOLD}Neg. Log-Likelihood:{_RESET} {self.nll:.4f}")
+            lines.append(f"Neg. Log-Likelihood: {self.nll:.4f}")
+        if self.n_total_params is not None:
+            lines.append(f"Parameters: {self.n_total_params}")
+        if self.bic is not None:
+            lines.append(f"BIC: {self.bic:.2f}")
 
         # Training Metadata
         if self.training_info:
             lines.append("")
-            lines.append(f"{_BOLD}Training Metadata{_RESET}")
+            lines.append("Training Metadata")
             lines.append("-" * _WIDTH)
             ti = self.training_info
             lines.append(f"Algorithm: {ti.get('algorithm', 'N/A')}")
@@ -575,7 +760,7 @@ class Summary(AutoPrintMixin):
         # Data Context
         if self.dataset_info:
             lines.append("")
-            lines.append(f"{_BOLD}Data Context{_RESET}")
+            lines.append("Data Context")
             lines.append("-" * _WIDTH)
             di = self.dataset_info
             lines.append(f"Subjects: {di.get('n_subjects', 'N/A')}")
@@ -593,7 +778,7 @@ class Summary(AutoPrintMixin):
         for category, params in self.parameters.items():
             if params:
                 lines.append("")
-                lines.append(f"{_BOLD}{category}{_RESET}")
+                lines.append(category)
                 lines.append("-" * _WIDTH)
                 lines.extend(self._format_parameter_group(params))
 
@@ -603,18 +788,18 @@ class Summary(AutoPrintMixin):
     def help(self) -> None:
         """Print available attributes and their meanings."""
         help_text = f"""
-{_BOLD}Summary Help{_RESET}
+Summary Help
 {'=' * 60}
 
 The Summary object provides access to model metadata and parameters.
 
-{_BOLD}Usage:{_RESET}
+Usage:
     model.summary()       # Print the formatted summary
     s = model.summary()   # Store to access individual attributes
 
-{_BOLD}Available Attributes:{_RESET}
+Available Attributes:
 
-  {_BOLD}Model Information:{_RESET}
+  Model Information:
     name              Model name (str)
     model_type        Model class name, e.g., 'LogisticModel' (str)
     dimension         Number of features (int)
@@ -625,28 +810,30 @@ The Summary object provides access to model metadata and parameters.
     n_clusters        Number of clusters (int or None)
     obs_models        Observation model names (list[str] or None)
 
-  {_BOLD}Training:{_RESET}
+  Training:
     algorithm         Algorithm name, e.g., 'mcmc_saem' (str)
     seed              Random seed used (int)
     n_iter            Number of iterations (int)
     converged         Whether training converged (bool or None)
     nll               Negative log-likelihood (float or None)
+    n_total_params    Number of free parameters (int)
+    bic               Bayesian Information Criterion (float or None)
 
-  {_BOLD}Dataset:{_RESET}
+  Dataset:
     n_subjects        Number of subjects in training data (int)
     n_visits          Total number of visits (int)
     n_observations    Total number of observations (int)
 
-  {_BOLD}Parameters:{_RESET}
+  Parameters:
     parameters        All parameters grouped by category (dict)
     get_param(name)   Get a specific parameter by name
 
-  {_BOLD}Other:{_RESET}
+  Other:
     training_info     Full training metadata (TrainingInfo)
     dataset_info      Full dataset statistics (DatasetInfo)
     leaspy_version    Leaspy version used (str)
 
-{_BOLD}Examples:{_RESET}
+Examples:
     >>> s = model.summary()
     >>> s.algorithm              # 'mcmc_saem'
     >>> s.seed                   # 42
