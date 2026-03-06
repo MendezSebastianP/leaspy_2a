@@ -90,8 +90,8 @@ Use `StatelessModel` when:
 
 ## What comes next?
 
-`StatefulModel` gives a model its internal structure: the `State`, the [DAG](DAG.md), and typed access to variables. But it says nothing about **how the algorithm should use** that structure during optimization.
+`StatefulModel` gives a model its internal structure: the `State`, the [DAG](DAG.md), and typed access to variables. But the DAG is only as useful as the building blocks that populate it.
 
-That is the role of [`McmcSaemCompatibleModel`](McmcSaemCompatibleModel.md), which inherits from `StatefulModel` and adds the contract that the MCMC-SAEM algorithm expects: computing sufficient statistics, updating parameters, and injecting data into the state.
+Before diving into the full dependency graph, it is worth understanding the six Python classes that represent every node: `Hyperparameter`, `DataVariable`, `ModelParameter`, `PopulationLatentVariable`, `IndividualLatentVariable`, and `LinkedVariable`. Knowing which one to use — and what constructor arguments to provide — is the core skill for declaring a new model.
 
 → Continue reading: [McmcSaemCompatibleModel](McmcSaemCompatibleModel.md)

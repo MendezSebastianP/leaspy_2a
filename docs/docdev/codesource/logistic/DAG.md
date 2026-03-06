@@ -215,4 +215,4 @@ The `VariablesDAG` is a **static blueprint**: it describes what variables exist 
 
 The `State` object holds the **runtime values** for each variable. It keeps a reference to the DAG so it can propagate updates correctly. When you write `state["tau"] = new_value`, the `State` uses the DAG's `sorted_children["tau"]` to invalidate all downstream caches (`rt`, `model`, `nll_attach`).
 
-See [StatefulModel](../logistic/StatefulModel) for how the `State` is created and managed.
+See [Variable Types](../logistic/VariableTypes) for a full explanation of each variable class, and [StatefulModel](../logistic/StatefulModel) for how the `State` is created and managed.
