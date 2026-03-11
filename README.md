@@ -7,7 +7,7 @@
 
 # Leaspy - LEArning Spatiotemporal Patterns in Python
 
-Leaspy is a software package for the statistical analysis of **longitudinal data**, particularly **medical** data that comes in a form of **repeated observations** of patients at different time-points.
+Leaspy is a software package for the statistical analysis of **longitudinal data**, particularly **medical** data that comes in a form of **repeated observations** of patients at different time-points. 
 
 ## Get started Leaspy
 
