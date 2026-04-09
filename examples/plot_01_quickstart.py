@@ -24,25 +24,31 @@ print(alzheimer_df.head())
 
 
 # %%
-# ```{warning}
-# You **MUST** include both `ID` and `TIME`, either as indices or as columns.
-# The remaining columns should correspond to the observed variables
-# (also called features or endpoints).
-# Each feature should have its own column, and each visit should occupy one row.
-# ```
+# .. warning::
+#
+#    You **MUST** include both ``ID`` and ``TIME``, either as indices or as columns.
+#    The remaining columns should correspond to the observed variables
+#    (also called features or endpoints).
+#    Each feature should have its own column, and each visit should occupy one row.
 
 
 # %%
-# ```{warning}
-# - Leaspy supports *linear* and *logistic* models.
-# - The features **MUST** be increasing over time.
-# - For logistic models, data must be rescaled between 0 and 1.
-# ```
+# .. warning::
+#
+#    - Leaspy supports *linear* and *logistic* models.
+#    - The features **MUST** be increasing over time.
+#    - For logistic models, data must be rescaled between 0 and 1.
 
-from leaspy.io.data import Data, Dataset
+from leaspy.io.data import Data
 
 data = Data.from_dataframe(alzheimer_df)
-dataset = Dataset(data)
+
+# %%
+# .. seealso::
+#
+#    For a deeper understanding of the ``Data`` and ``Dataset`` classes, including
+#    iteration, cofactors, and best practices, refer to the Data Containers Guide
+#    in the documentation.
 
 # %%
 # The core functionality of Leaspy is to estimate the group-average trajectory
@@ -53,25 +59,40 @@ from leaspy.models import LogisticModel
 
 model = LogisticModel(name="test-model", source_dimension=2)
 model.fit(
-    dataset,
+    data,
     "mcmc_saem",
     seed=42,
     n_iter=100,
     progress_bar=False,
 )
+model.summary()
 
 # %%
+# The ``fit`` method estimates the parameters of the model, which are then accessible
+# through the ``summary`` method. The parameters are also stored in the ``parameters`` attribute of the model.
+
+model.info()
+
+# %%
+# The method ``info`` provides the model configuration and the settings used for the fit,
+# as well as the dataset information and the training information.
+#
 # Leaspy can also estimate the *individual trajectories* of each participant.
 # This is done using a personalization algorithm, here `scipy_minimize`:
 
 individual_parameters = model.personalize(
-    dataset, "scipy_minimize", seed=0, progress_bar=False
+    data, "scipy_minimize", seed=0, progress_bar=False, use_jacobian=False
 )
 print(individual_parameters.to_dataframe())
 
+# %%
+# We have seen how to fit a model and personalize it to individuals.
+# Leaspy also provides various plotting functions to visualize the results.
+# Let's  go to the next :doc:`section <plot_02_parkinson_example>` to see how to plot
+# the group-average trajectory and the individual trajectories using the Parkinson's disease dataset.
 
 # %%
-# To go further;
+# To go further:
 #
-# 1. See the [User Guide](../user_guide.md) and full API documentation.
-# 2. Explore additional [examples](./index.rst).
+# 1. See the :doc:`User Guide <../user_guide>` and full API documentation.
+# 2. Explore additional :doc:`examples <./index>`.
